@@ -1,0 +1,295 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   VESPERA ATELIER — GLOBAL DESIGN SYSTEM & CSS THEME VARIABLES
+   Dynamically controlled via Admin Panel -> System Settings
+   ========================================================================== */
+:root {
+  /* Core Palette (60% Dominant Warm Neutral, 30% Structural Surface, 10% Accent) */
+  --color-bg-canvas: #faf8f5;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-alt: #f3efe8;
+  --color-text-primary: #1c1b19;
+  --color-text-muted: #5c574f;
+  --color-accent: #1e2a32;
+  --color-accent-hover: #141d23;
+  --color-accent-contrast: #faf8f5;
+  --color-brass: #8c6d46;
+  --color-border: rgba(28, 27, 25, 0.1);
+  --color-border-strong: rgba(28, 27, 25, 0.18);
+
+  /* Typography Families */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Spatial & Elevation Tokens */
+  --radius-card: 0.75rem;
+  --radius-btn: 0.5rem;
+  --shadow-card: 0 4px 20px -6px rgba(28, 27, 25, 0.06), 0 1px 3px rgba(28, 27, 25, 0.04);
+  --shadow-card-hover: 0 14px 32px -10px rgba(28, 27, 25, 0.12), 0 4px 10px rgba(28, 27, 25, 0.05);
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base Document Rules */
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Typographic Utility Classes */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.headline-balance {
+  text-wrap: balance;
+}
+
+/* Softly Shadowed Glass-Touched Product Card */
+.vespera-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: transform 200ms var(--ease-settle), box-shadow 200ms var(--ease-settle), border-color 200ms var(--ease-settle);
+}
+
+.vespera-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-border-strong);
+}
+
+.vespera-card-media img {
+  transition: transform 350ms var(--ease-settle);
+}
+
+.vespera-card:hover .vespera-card-media img {
+  transform: scale(1.03);
+}
+
+/* High-Contrast Primary CTA Button */
+.vespera-btn-primary {
+  background-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+  border-radius: var(--radius-btn);
+  transition: background-color 180ms var(--ease-settle), transform 180ms var(--ease-settle);
+}
+
+.vespera-btn-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.vespera-btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.vespera-btn-primary:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   CRITICAL ADMIN RULE: RESPONSIVE TABLE-TO-CARD CONVERSION (< 768px)
+   Standard HTML data tables transform into stacked, touch-friendly Card Views
+   on mobile viewports to eliminate horizontal scrolling completely.
+   ========================================================================== */
+.admin-responsive-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-responsive-table thead th {
+  text-align: left;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+  padding: 0.9rem 1.15rem;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.admin-responsive-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 150ms ease;
+}
+
+.admin-responsive-table tbody tr:hover {
+  background-color: var(--color-bg-surface-alt);
+}
+
+.admin-responsive-table tbody td {
+  padding: 1rem 1.15rem;
+  vertical-align: middle;
+  font-size: 1.03125rem;
+}
+
+/* Overall Admin Console Typography Scale */
+.vespera-admin-shell {
+  font-size: 16px;
+}
+
+.vespera-admin-shell h1 {
+  font-size: clamp(1.75rem, 2.3vw, 2.25rem);
+  line-height: 1.2;
+}
+
+.vespera-admin-shell .text-\[10px\]:not(.vespera-popover-preview):not(.vespera-popover-preview *),
+.vespera-admin-shell .text-\[11px\]:not(.vespera-popover-preview):not(.vespera-popover-preview *) {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.vespera-admin-shell .text-xs:not(.vespera-popover-preview):not(.vespera-popover-preview *) {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.vespera-admin-shell .text-sm:not(.vespera-popover-preview):not(.vespera-popover-preview *) {
+  font-size: 1.03125rem;
+  line-height: 1.55;
+}
+
+.vespera-admin-shell .text-base:not(.vespera-popover-preview):not(.vespera-popover-preview *) {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.vespera-admin-shell .text-lg:not(.vespera-popover-preview):not(.vespera-popover-preview *) {
+  font-size: 1.28125rem;
+  line-height: 1.45;
+}
+
+.vespera-admin-shell .text-xl:not(.vespera-popover-preview):not(.vespera-popover-preview *) {
+  font-size: 1.45rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 767px) {
+  .admin-responsive-table,
+  .admin-responsive-table thead,
+  .admin-responsive-table tbody,
+  .admin-responsive-table th,
+  .admin-responsive-table td,
+  .admin-responsive-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  /* Hide desktop table header row cleanly on mobile */
+  .admin-responsive-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Transform each table row into a self-contained mobile Card View */
+  .admin-responsive-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .admin-responsive-table tbody tr {
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 0.875rem 1rem;
+  }
+
+  .admin-responsive-table tbody tr:hover {
+    background-color: var(--color-bg-surface);
+  }
+
+  .admin-responsive-table tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(28, 27, 25, 0.06);
+    text-align: right;
+    min-height: 2.5rem;
+  }
+
+  .admin-responsive-table tbody td:last-child {
+    border-bottom: 0;
+    padding-top: 0.75rem;
+    padding-bottom: 0.125rem;
+  }
+
+  /* Render field header label inside each mobile card row */
+  .admin-responsive-table tbody td::before {
+    content: attr(data-label);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  /* Primary header cell inside mobile card (e.g., product preview or order ID) */
+  .admin-responsive-table tbody td[data-primary="true"] {
+    justify-content: flex-start;
+    text-align: left;
+    padding-top: 0.125rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .admin-responsive-table tbody td[data-primary="true"]::before {
+    display: none;
+  }
+}
+
+/* Reduced Motion Respect */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Vespera Atelier",
+  "description": "Architectural furniture e-commerce storefront and integrated studio administration console.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
