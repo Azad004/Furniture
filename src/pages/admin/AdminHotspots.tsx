@@ -16,7 +16,7 @@ import {
 import { useStore } from '../../context/StoreContext';
 import { MosaicHotspot, MosaicTile } from '../../types/store';
 import { SafeImage } from '../../components/common/SafeImage';
-import { sanitizeImageUrl, validateAndReadImageFile } from '../../utils/security';
+import { resolveAssetUrl, sanitizeImageUrl, validateAndReadImageFile } from '../../utils/security';
 
 type MosaicSectionKey = 'bestSellers' | 'shopLook' | 'collections';
 
@@ -415,7 +415,7 @@ export const AdminHotspots: React.FC = () => {
               >
                 <div className="relative h-20 w-full overflow-hidden bg-black/5">
                   <img
-                    src={tile.image}
+                    src={resolveAssetUrl(tile.image)}
                     alt={tile.alt}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
@@ -522,7 +522,7 @@ export const AdminHotspots: React.FC = () => {
               style={{ borderColor: 'var(--color-border)' }}
             >
               <img
-                src={activeTile.image}
+                src={resolveAssetUrl(activeTile.image)}
                 alt={activeTile.alt}
                 className={`w-full h-full object-cover pointer-events-none ${
                   activeTile.objectPositionClass || 'object-center'
@@ -670,7 +670,7 @@ export const AdminHotspots: React.FC = () => {
                         >
                           <div className="relative h-14 w-full overflow-hidden">
                             <img
-                              src={preset.src}
+                              src={resolveAssetUrl(preset.src)}
                               alt={preset.label}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             />

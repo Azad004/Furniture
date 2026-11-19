@@ -497,8 +497,13 @@ export function sanitizeImageUrl(raw: unknown): string {
   // Block control characters or embedded whitespace injection
   if (/[\u0000-\u001F\u007F]/.test(trimmed)) return '';
 
-  // Allow safe root-relative static studio asset paths
-  if (trimmed.startsWith('/src/assets/') || trimmed.startsWith('/assets/')) {
+  // Allow safe root-relative or relative static studio asset paths
+  if (
+    trimmed.startsWith('/src/assets/') ||
+    trimmed.startsWith('./src/assets/') ||
+    trimmed.startsWith('/assets/') ||
+    trimmed.startsWith('./assets/')
+  ) {
     if (trimmed.includes('..') || trimmed.includes('\\')) return '';
     return trimmed;
   }
@@ -519,6 +524,19 @@ export function sanitizeImageUrl(raw: unknown): string {
   } catch {
     return '';
   }
+}
+
+/**
+ * Resolves a sanitized image URL so local studio assets work both at root URLs
+ * and on subpath deployments (such as GitHub Pages https://user.github.io/repo/).
+ */
+export function resolveAssetUrl(raw: unknown): string {
+  const safe = sanitizeImageUrl(raw);
+  if (!safe) return '';
+  if (safe.startsWith('/src/assets/') || safe.startsWith('/assets/')) {
+    return `.${safe}`;
+  }
+  return safe;
 }
 
 async function hasValidRasterMagicBytes(file: File): Promise<boolean> {

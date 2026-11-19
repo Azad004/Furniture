@@ -5,6 +5,7 @@ import { FurnitureCategory, MosaicTile, Product } from '../../types/store';
 import { SafeImage } from '../../components/common/SafeImage';
 import { ProductCard } from '../../components/storefront/ProductCard';
 import { HotspotTileCard } from '../../components/storefront/HotspotTileCard';
+import { resolveAssetUrl } from '../../utils/security';
 
 const TOP_SEASON_PICKS: Array<{
   title: string;
@@ -500,7 +501,7 @@ export const HomePage: React.FC = () => {
                   }}
                 >
                   <img
-                    src={cat.image}
+                    src={resolveAssetUrl(cat.image)}
                     alt={cat.name}
                     referrerPolicy="no-referrer"
                     style={{
@@ -629,7 +630,7 @@ export const HomePage: React.FC = () => {
                 }}
               >
                 <img
-                  src={pick.image}
+                  src={resolveAssetUrl(pick.image)}
                   alt={pick.title}
                   referrerPolicy="no-referrer"
                   style={{ objectPosition: pick.objectPosition || '50% 50%' }}

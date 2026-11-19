@@ -631,15 +631,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const skipNextFullSyncRef = useRef<boolean>(false);
   const serverHydratedRef = useRef<boolean>(false);
   const pendingVisitRef = useRef<boolean>(false);
+  const backendAvailableRef = useRef<boolean>(true);
   const lastSharedJsonRef = useRef<string>(JSON.stringify(extractSharedState(state)));
 
+  const isJsonResponse = (res: Response): boolean =>
+    res.ok && (res.headers.get('content-type') || '').toLowerCase().includes('application/json');
+
   const dispatchVisitEvent = useCallback(() => {
+    if (!backendAvailableRef.current) return;
     void fetch('/api/events/visit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ clientId: clientIdRef.current }),
     })
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => (isJsonResponse(res) ? res.json() : null))
       .then((json) => {
         if (json?.ok && typeof json.siteVisits === 'number') {
           isRemoteUpdateRef.current = true;
@@ -653,7 +658,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       })
       .catch(() => {
-        // Offline or server unavailable; local optimistic count remains intact
+        // Offline or static host; local optimistic count remains intact
       });
   }, []);
 
@@ -667,6 +672,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 
   const seedServerIfNeeded = useCallback(async () => {
+    if (!backendAvailableRef.current) {
+      serverHydratedRef.current = true;
+      return;
+    }
     try {
       const shared = extractSharedState(latestStateRef.current);
       const res = await fetch('/api/state/sync', {
@@ -678,7 +687,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           data: shared,
         }),
       });
-      if (res.ok) {
+      if (isJsonResponse(res)) {
         const json = await res.json();
         if (json?.data) {
           applyRemoteSnapshot(json.data as Partial<SharedStateSlice>, json.updatedAt);
@@ -686,6 +695,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           lastSharedJsonRef.current = JSON.stringify(shared);
           setLastSyncedAt(json?.updatedAt || new Date().toISOString());
         }
+      } else {
+        backendAvailableRef.current = false;
       }
     } catch {
       // Ignore transient seed failures
@@ -699,9 +710,29 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [applyRemoteSnapshot, dispatchVisitEvent]);
 
   const refreshFromServer = useCallback(async (): Promise<boolean> => {
+    if (!backendAvailableRef.current) {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as Partial<PersistedState>;
+          applyRemoteSnapshot(parsed, new Date().toISOString());
+        } else {
+          setLastSyncedAt(new Date().toISOString());
+        }
+        return true;
+      } catch {
+        setLastSyncedAt(new Date().toISOString());
+        return false;
+      }
+    }
+
     try {
       const res = await fetch('/api/dashboard/metrics', { cache: 'no-store' });
-      if (!res.ok) return false;
+      if (!isJsonResponse(res)) {
+        backendAvailableRef.current = false;
+        setLastSyncedAt(new Date().toISOString());
+        return false;
+      }
       const json = (await res.json()) as {
         initialized?: boolean;
         updatedAt?: string;
@@ -721,14 +752,26 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [applyRemoteSnapshot]);
 
   // Real-time WebSocket synchronization with auto-reconnect + HTTP fallback
+  // Automatically steps down cleanly on static hosts (e.g., GitHub Pages)
   useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.protocol === 'file:' || window.location.hostname.endsWith('.github.io'))
+    ) {
+      backendAvailableRef.current = false;
+      serverHydratedRef.current = true;
+      return;
+    }
+
     let active = true;
     let ws: WebSocket | null = null;
     let reconnectTimer: number | null = null;
     let reconnectDelay = 1000;
+    let wsEverOpened = false;
+    let initialFailures = 0;
 
     const connect = () => {
-      if (!active) return;
+      if (!active || !backendAvailableRef.current) return;
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws`;
 
@@ -740,6 +783,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       ws.onopen = () => {
+        wsEverOpened = true;
+        initialFailures = 0;
         reconnectDelay = 1000;
         try {
           ws?.send(JSON.stringify({ type: 'hello', clientId: clientIdRef.current }));
@@ -794,7 +839,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       };
 
       ws.onclose = () => {
-        if (active) scheduleReconnect();
+        if (!active) return;
+        if (!wsEverOpened) {
+          initialFailures += 1;
+          if (initialFailures >= 2) {
+            backendAvailableRef.current = false;
+            serverHydratedRef.current = true;
+            return;
+          }
+        }
+        scheduleReconnect();
       };
 
       ws.onerror = () => {
@@ -807,7 +861,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const scheduleReconnect = () => {
-      if (!active || reconnectTimer !== null) return;
+      if (!active || !backendAvailableRef.current || reconnectTimer !== null) return;
       reconnectTimer = window.setTimeout(() => {
         reconnectTimer = null;
         reconnectDelay = Math.min(reconnectDelay * 1.8, 15000);
@@ -819,11 +873,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // HTTP hydration fallback if WebSocket handshake is delayed
     const fallbackTimer = window.setTimeout(() => {
-      if (!active || serverHydratedRef.current) return;
+      if (!active || serverHydratedRef.current || !backendAvailableRef.current) return;
       void fetch('/api/state', { cache: 'no-store' })
-        .then((res) => (res.ok ? res.json() : null))
+        .then((res) => (isJsonResponse(res) ? res.json() : null))
         .then((json) => {
-          if (!active || serverHydratedRef.current || !json) return;
+          if (!active || serverHydratedRef.current) return;
+          if (!json) {
+            backendAvailableRef.current = false;
+            serverHydratedRef.current = true;
+            return;
+          }
           if (json.initialized && json.data) {
             applyRemoteSnapshot(json.data as Partial<SharedStateSlice>, json.updatedAt);
             serverHydratedRef.current = true;
@@ -837,6 +896,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })
         .catch(() => {
           // Remain usable offline with localStorage
+          backendAvailableRef.current = false;
           serverHydratedRef.current = true;
         });
     }, 1200);
@@ -920,7 +980,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
-    if (!serverHydratedRef.current || sharedJson === lastSharedJsonRef.current) {
+    if (
+      !backendAvailableRef.current ||
+      !serverHydratedRef.current ||
+      sharedJson === lastSharedJsonRef.current
+    ) {
       return;
     }
 
@@ -934,7 +998,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           data: shared,
         }),
       })
-        .then((res) => (res.ok ? res.json() : null))
+        .then((res) => (isJsonResponse(res) ? res.json() : null))
         .then((json) => {
           if (json?.ok && typeof json.updatedAt === 'string') {
             setLastSyncedAt(json.updatedAt);
@@ -1518,12 +1582,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       };
     });
 
+    if (!backendAvailableRef.current) return;
+
     void fetch('/api/events/product-view', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId, clientId: clientIdRef.current }),
     })
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => (isJsonResponse(res) ? res.json() : null))
       .then((json) => {
         if (json?.ok && json.productViewCounts && typeof json.productViewCounts === 'object') {
           isRemoteUpdateRef.current = true;
@@ -1537,7 +1603,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       })
       .catch(() => {
-        // Offline or transient network error
+        // Offline or static host
       });
   }, []);
 

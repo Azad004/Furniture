@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Armchair } from 'lucide-react';
-import { sanitizeImageUrl } from '../../utils/security';
+import { resolveAssetUrl } from '../../utils/security';
 
 interface SafeImageProps {
   src: string;
@@ -9,7 +9,7 @@ interface SafeImageProps {
 }
 
 export const SafeImage: React.FC<SafeImageProps> = ({ src, alt, className = '' }) => {
-  const safeSrc = sanitizeImageUrl(src);
+  const safeSrc = resolveAssetUrl(src);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {

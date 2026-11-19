@@ -6,12 +6,14 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // Relative base ensures built JS, CSS, and static assets resolve cleanly
+    // on both root domains and GitHub Pages subpaths (https://user.github.io/repo/).
+    base: './',
     plugins: [
       react(),
       tailwindcss(),
-      // Copies src/assets into dist/ so root-relative URLs like
-      // "/src/assets/images/..." (e.g. generate_image output) still resolve
-      // in production builds. Do not remove.
+      // Copies src/assets into dist/ and adds GitHub Pages support files
+      // (.nojekyll + 404.html) so root/relative asset URLs resolve in production builds.
       {
         name: 'copy-unbundled-src-assets',
         apply: 'build',
@@ -24,6 +26,14 @@ export default defineConfig(() => {
           const distAssets = path.resolve(distDir, 'src/assets');
           if (fs.existsSync(distDir) && fs.existsSync(srcAssets)) {
             fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
+          }
+          if (fs.existsSync(distDir)) {
+            fs.writeFileSync(path.join(distDir, '.nojekyll'), '', 'utf8');
+            const indexHtml = path.join(distDir, 'index.html');
+            const notFoundHtml = path.join(distDir, '404.html');
+            if (fs.existsSync(indexHtml)) {
+              fs.copyFileSync(indexHtml, notFoundHtml);
+            }
           }
         },
       },
