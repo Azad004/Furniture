@@ -14,33 +14,37 @@ export default defineConfig(() => {
       ? rawBase
       : `/${rawBase.replace(/^\/+|\/+$/g, '')}/`
     : './';
+  let resolvedOutDir = path.resolve(ROOT_DIR, 'dist');
 
   return {
-    // Supports explicit GitHub Pages repo base path via VITE_BASE_PATH and defaults to
-    // relative './' so built JS, CSS, and static assets resolve cleanly at any subpath.
+    // Defaults to relative './' so built JS, CSS, and static assets resolve cleanly
+    // on root domains, GitHub Pages project subpaths (https://user.github.io/repo/),
+    // and custom domains alike.
     base,
     plugins: [
       react(),
       tailwindcss(),
-      // Copies src/assets into dist/ and adds GitHub Pages support files
-      // (.nojekyll + 404.html) so root/relative asset URLs resolve in production builds.
+      // Copies src/assets into the build output directory and adds GitHub Pages support
+      // files (.nojekyll + 404.html) so all studio assets resolve in production builds.
       {
         name: 'copy-unbundled-src-assets',
         apply: 'build',
+        configResolved(config): void {
+          resolvedOutDir = path.resolve(ROOT_DIR, config.build.outDir || 'dist');
+        },
         closeBundle(error?: Error): void {
           if (error) {
             return;
           }
-          const distDir = path.resolve(ROOT_DIR, 'dist');
           const srcAssets = path.resolve(ROOT_DIR, 'src/assets');
-          const distAssets = path.resolve(distDir, 'src/assets');
-          if (fs.existsSync(distDir) && fs.existsSync(srcAssets)) {
-            fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
+          const outAssets = path.resolve(resolvedOutDir, 'src/assets');
+          if (fs.existsSync(resolvedOutDir) && fs.existsSync(srcAssets)) {
+            fs.cpSync(srcAssets, outAssets, {recursive: true, force: true});
           }
-          if (fs.existsSync(distDir)) {
-            fs.writeFileSync(path.join(distDir, '.nojekyll'), '', 'utf8');
-            const indexHtml = path.join(distDir, 'index.html');
-            const notFoundHtml = path.join(distDir, '404.html');
+          if (fs.existsSync(resolvedOutDir)) {
+            fs.writeFileSync(path.join(resolvedOutDir, '.nojekyll'), '', 'utf8');
+            const indexHtml = path.join(resolvedOutDir, 'index.html');
+            const notFoundHtml = path.join(resolvedOutDir, '404.html');
             if (fs.existsSync(indexHtml)) {
               fs.copyFileSync(indexHtml, notFoundHtml);
             }

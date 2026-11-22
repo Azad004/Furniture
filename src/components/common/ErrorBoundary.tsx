@@ -18,8 +18,8 @@ export class ErrorBoundary extends React.Component<
     return { hasError: true };
   }
 
-  componentDidCatch(): void {
-    // Intentionally avoid exposing internal stack details in the rendered UI
+  componentDidCatch(error: Error): void {
+    console.error('Application render error:', error);
   }
 
   private handleReset = () => {
