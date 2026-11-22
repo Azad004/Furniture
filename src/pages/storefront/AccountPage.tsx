@@ -25,6 +25,9 @@ import {
   registerOrVerifyCustomer,
 } from '../../utils/security';
 
+const INTERIOR_BACKDROP_SRC =
+  '/src/assets/images/furniture_interior_backdrop_1795089361104.jpg';
+
 interface AccountPageProps {
   initialTab?: AccountTab;
 }
@@ -164,32 +167,45 @@ export const AccountPage: React.FC<AccountPageProps> = ({ initialTab = 'overview
     navigate({ page: 'account', tab: 'overview' });
   };
 
-  // SIGNED-OUT PAGE VIEW
+  // SIGNED-OUT REGISTRATION & LOGIN PAGE VIEW
   if (!userProfile) {
     return (
-      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-12 sm:py-16">
-        <header className="pb-8 border-b space-y-2 mb-10" style={{ borderColor: 'var(--color-border)' }}>
-          <p className="text-xs font-medium tracking-wide" style={{ color: 'var(--color-text-muted)' }}>
-            Vespera Studio Membership
-          </p>
-          <h1 className="font-display text-3xl sm:text-4xl font-medium">
-            Sign In or Create Account
-          </h1>
-          <p className="text-sm max-w-2xl" style={{ color: 'var(--color-text-muted)' }}>
-            Access saved studio specifications, white-glove delivery schedules, loyalty points, and order tracking.
-          </p>
-        </header>
+      <section className="relative min-h-[calc(100vh-140px)] flex items-center overflow-hidden">
+        {/* Full-Bleed Architectural Furniture Interior Backdrop */}
+        <div className="absolute inset-0 z-0 pointer-events-none select-none" aria-hidden="true">
+          <SafeImage
+            src={INTERIOR_BACKDROP_SRC}
+            alt="Sunlit architectural living room interior with curved wool bouclé sectional and Roman travertine coffee table"
+            className="w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#181613]/68 via-[#1c1b19]/48 to-[#181613]/72" />
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left 7 Cols: Password-Protected Sign In / Registration Form */}
-          <section
-            className="lg:col-span-7 rounded-xl border p-6 sm:p-8 space-y-6"
-            style={{
-              backgroundColor: 'var(--color-bg-surface)',
-              borderColor: 'var(--color-border)',
-              boxShadow: 'var(--shadow-card)',
-            }}
+        <main className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-12 sm:py-16">
+          <header
+            className="pb-8 border-b space-y-2 mb-10 text-white"
+            style={{ borderColor: 'rgba(255, 255, 255, 0.22)' }}
           >
+            <p className="text-xs font-medium tracking-wide text-white/80">
+              Vespera Studio Membership
+            </p>
+            <h1 className="font-display text-3xl sm:text-4xl font-medium">
+              Sign In or Create Account
+            </h1>
+            <p className="text-sm max-w-2xl text-white/85">
+              Access saved studio specifications, white-glove delivery schedules, loyalty points, and order tracking.
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left 7 Cols: Password-Protected Sign In / Registration Form */}
+            <section
+              className="lg:col-span-7 rounded-xl border p-6 sm:p-8 space-y-6 backdrop-blur-md shadow-2xl"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--color-bg-surface) 94%, transparent)',
+                borderColor: 'rgba(255, 255, 255, 0.35)',
+              }}
+            >
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="space-y-1">
                 <h2 className="font-display text-2xl font-medium">
@@ -197,8 +213,8 @@ export const AccountPage: React.FC<AccountPageProps> = ({ initialTab = 'overview
                 </h2>
                 <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                   {authMode === 'signin'
-                    ? 'Sign in with your verified email and password.'
-                    : 'Register with a strong password (8+ characters, letters & numbers) to receive 500 welcome points.'}
+                    ? 'Sign in with your email and password.'
+                    : 'Create an account to earn 500 welcome points.'}
                 </p>
               </div>
 
@@ -320,10 +336,10 @@ export const AccountPage: React.FC<AccountPageProps> = ({ initialTab = 'overview
           {/* Right 5 Cols: Membership Perks & Order Tracking */}
           <aside className="lg:col-span-5 space-y-5">
             <div
-              className="rounded-xl border p-6 space-y-4"
+              className="rounded-xl border p-6 space-y-4 backdrop-blur-md shadow-xl"
               style={{
-                backgroundColor: 'var(--color-bg-surface-alt)',
-                borderColor: 'var(--color-border)',
+                backgroundColor: 'color-mix(in srgb, var(--color-bg-surface-alt) 92%, transparent)',
+                borderColor: 'rgba(255, 255, 255, 0.3)',
               }}
             >
               <h3 className="font-display text-lg font-medium">Membership Privileges</h3>
@@ -344,10 +360,10 @@ export const AccountPage: React.FC<AccountPageProps> = ({ initialTab = 'overview
             </div>
 
             <div
-              className="rounded-xl border p-6 space-y-3"
+              className="rounded-xl border p-6 space-y-3 backdrop-blur-md shadow-xl"
               style={{
-                backgroundColor: 'var(--color-bg-surface)',
-                borderColor: 'var(--color-border)',
+                backgroundColor: 'color-mix(in srgb, var(--color-bg-surface) 94%, transparent)',
+                borderColor: 'rgba(255, 255, 255, 0.35)',
               }}
             >
               <h3 className="font-display text-lg font-medium">Looking for a shipment?</h3>
@@ -365,7 +381,8 @@ export const AccountPage: React.FC<AccountPageProps> = ({ initialTab = 'overview
             </div>
           </aside>
         </div>
-      </main>
+        </main>
+      </section>
     );
   }
 

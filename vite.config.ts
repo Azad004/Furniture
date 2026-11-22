@@ -2,13 +2,23 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
+import {fileURLToPath} from 'url';
 import {defineConfig} from 'vite';
 
+const ROOT_DIR = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig(() => {
+  const rawBase = process.env.VITE_BASE_PATH?.trim();
+  const base = rawBase
+    ? rawBase === '/' || rawBase === './'
+      ? rawBase
+      : `/${rawBase.replace(/^\/+|\/+$/g, '')}/`
+    : './';
+
   return {
-    // Relative base ensures built JS, CSS, and static assets resolve cleanly
-    // on both root domains and GitHub Pages subpaths (https://user.github.io/repo/).
-    base: './',
+    // Supports explicit GitHub Pages repo base path via VITE_BASE_PATH and defaults to
+    // relative './' so built JS, CSS, and static assets resolve cleanly at any subpath.
+    base,
     plugins: [
       react(),
       tailwindcss(),
@@ -21,8 +31,8 @@ export default defineConfig(() => {
           if (error) {
             return;
           }
-          const distDir = path.resolve(__dirname, 'dist');
-          const srcAssets = path.resolve(__dirname, 'src/assets');
+          const distDir = path.resolve(ROOT_DIR, 'dist');
+          const srcAssets = path.resolve(ROOT_DIR, 'src/assets');
           const distAssets = path.resolve(distDir, 'src/assets');
           if (fs.existsSync(distDir) && fs.existsSync(srcAssets)) {
             fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
@@ -40,7 +50,7 @@ export default defineConfig(() => {
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': ROOT_DIR,
       },
     },
     server: {

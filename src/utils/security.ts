@@ -534,7 +534,12 @@ export function resolveAssetUrl(raw: unknown): string {
   const safe = sanitizeImageUrl(raw);
   if (!safe) return '';
   if (safe.startsWith('/src/assets/') || safe.startsWith('/assets/')) {
-    return `.${safe}`;
+    const base = import.meta.env.BASE_URL || './';
+    if (base === './' || base === '/') {
+      return `.${safe}`;
+    }
+    const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    return `${normalizedBase}${safe}`;
   }
   return safe;
 }

@@ -29,10 +29,6 @@ import {
 } from './pages/storefront/StaticPages';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { SafeImage } from './components/common/SafeImage';
-
-const INTERIOR_BACKDROP_SRC =
-  '/src/assets/images/furniture_interior_backdrop_1795089361104.jpg';
 
 const AppRouter: React.FC = () => {
   const { route } = useStore();
@@ -48,51 +44,34 @@ const AppRouter: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col">
-      {/* Subtle Architectural Furniture Interior Backdrop */}
-      <div className="fixed inset-0 z-0 pointer-events-none select-none" aria-hidden="true">
-        <SafeImage
-          src={INTERIOR_BACKDROP_SRC}
-          alt="Serene architectural furniture interior backdrop"
-          className="w-full h-full object-cover object-center"
-        />
-        <div
-          className="absolute inset-0 backdrop-blur-[1.5px]"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--color-bg-canvas) 86%, transparent)',
-          }}
-        />
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <CartDrawer />
+      <div className="flex-1">
+        {route.page === 'home' && <HomePage />}
+        {route.page === 'shop' && (
+          <ShopPage initialCategory={route.category} initialQuery={route.query} />
+        )}
+        {route.page === 'collections' && <CollectionsPage />}
+        {route.page === 'product' && <ProductDetailPage slug={route.slug} />}
+        {route.page === 'track' && (
+          <TrackOrderPage initialOrderNumber={route.orderNumber} />
+        )}
+        {route.page === 'account' && <AccountPage initialTab={route.tab} />}
+        {route.page === 'showrooms' && <ShowroomsPage />}
+        {route.page === 'service' && <ServiceRequestPage />}
+        {route.page === 'help' && <HelpFaqPage />}
+        {route.page === 'recently-viewed' && <RecentlyViewedPage />}
+        {route.page === 'wishlist' && <WishlistPage />}
+        {route.page === 'events' && <EventsPage />}
+        {route.page === 'style-report' && <DesignStyleReportPage />}
+        {route.page === 'innovation' && <InnovationPage />}
+        {route.page === 'checkout' && <CheckoutPage />}
+        {route.page === 'about' && <AboutPage />}
+        {route.page === 'contact' && <ContactPage />}
+        {route.page === 'privacy' && <PrivacyPolicyPage />}
       </div>
-
-      <div className="relative z-10 min-h-screen flex flex-col">
-        <Header />
-        <CartDrawer />
-        <div className="flex-1">
-          {route.page === 'home' && <HomePage />}
-          {route.page === 'shop' && (
-            <ShopPage initialCategory={route.category} initialQuery={route.query} />
-          )}
-          {route.page === 'collections' && <CollectionsPage />}
-          {route.page === 'product' && <ProductDetailPage slug={route.slug} />}
-          {route.page === 'track' && (
-            <TrackOrderPage initialOrderNumber={route.orderNumber} />
-          )}
-          {route.page === 'account' && <AccountPage initialTab={route.tab} />}
-          {route.page === 'showrooms' && <ShowroomsPage />}
-          {route.page === 'service' && <ServiceRequestPage />}
-          {route.page === 'help' && <HelpFaqPage />}
-          {route.page === 'recently-viewed' && <RecentlyViewedPage />}
-          {route.page === 'wishlist' && <WishlistPage />}
-          {route.page === 'events' && <EventsPage />}
-          {route.page === 'style-report' && <DesignStyleReportPage />}
-          {route.page === 'innovation' && <InnovationPage />}
-          {route.page === 'checkout' && <CheckoutPage />}
-          {route.page === 'about' && <AboutPage />}
-          {route.page === 'contact' && <ContactPage />}
-          {route.page === 'privacy' && <PrivacyPolicyPage />}
-        </div>
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };

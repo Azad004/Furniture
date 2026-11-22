@@ -25,15 +25,11 @@ import { AdminHotspots } from './AdminHotspots';
 import { AdminReviews } from './AdminReviews';
 import { AdminSettings } from './AdminSettings';
 import { AdminAuthGate } from '../../components/admin/AdminAuthGate';
-import { SafeImage } from '../../components/common/SafeImage';
 import {
   clearAdminSession,
   isAdminSessionValid,
   touchAdminSession,
 } from '../../utils/security';
-
-const INTERIOR_BACKDROP_SRC =
-  '/src/assets/images/furniture_interior_backdrop_1795089361104.jpg';
 
 interface AdminLayoutProps {
   activeModule: AdminModule;
@@ -115,29 +111,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   return (
     <div
-      className="vespera-admin-shell relative min-h-screen flex flex-col lg:flex-row"
+      className="vespera-admin-shell min-h-screen flex flex-col lg:flex-row"
       style={{ backgroundColor: 'var(--color-bg-canvas)', color: 'var(--color-text-primary)' }}
     >
-      {/* Fixed Architectural Furniture Interior Backdrop */}
-      <div className="fixed inset-0 z-0 pointer-events-none select-none" aria-hidden="true">
-        <SafeImage
-          src={INTERIOR_BACKDROP_SRC}
-          alt="Modern luxury furniture interior background"
-          className="w-full h-full object-cover object-center"
-        />
-        <div
-          className="absolute inset-0 backdrop-blur-[2px]"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--color-bg-canvas) 82%, transparent)',
-          }}
-        />
-      </div>
-
       {/* Desktop Sidebar (276px) */}
       <aside
-        className="hidden lg:flex lg:w-[276px] lg:shrink-0 lg:flex-col border-r sticky top-0 h-screen z-20 backdrop-blur-md"
+        className="hidden lg:flex lg:w-[276px] lg:shrink-0 lg:flex-col border-r sticky top-0 h-screen"
         style={{
-          backgroundColor: 'color-mix(in srgb, var(--color-bg-surface) 92%, transparent)',
+          backgroundColor: 'var(--color-bg-surface)',
           borderColor: 'var(--color-border)',
         }}
       >
@@ -261,12 +242,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       )}
 
       {/* Main Content Viewport */}
-      <div className="relative z-10 flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col">
         {/* Top Breadcrumb Bar */}
         <header
-          className="h-[70px] px-4 sm:px-6 lg:px-7 border-b flex items-center justify-between gap-4 sticky top-0 z-30 backdrop-blur-md"
+          className="h-[70px] px-4 sm:px-6 lg:px-7 border-b flex items-center justify-between gap-4 sticky top-0 z-30"
           style={{
-            backgroundColor: 'color-mix(in srgb, var(--color-bg-surface) 92%, transparent)',
+            backgroundColor: 'var(--color-bg-surface)',
             borderColor: 'var(--color-border)',
           }}
         >
